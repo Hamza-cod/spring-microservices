@@ -16,6 +16,7 @@ import static org.springframework.http.HttpStatus.CREATED;
 @AllArgsConstructor
 public class ProductController {
     private  final ProductService productService;
+
     @PostMapping
     @ResponseStatus(CREATED)
     public void createProduct(@RequestBody ProductCreateRequest createRequest){
