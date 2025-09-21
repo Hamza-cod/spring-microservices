@@ -18,7 +18,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class OrderService {
     private final OrderRepository orderRepository;
-    private final WebClient webClient;
+    private final WebClient.Builder webClientBuilder;
     public void  placeOrder(OrderRequest orderRequest){
         var order = new Order();
         order.setOrderNumber(UUID.randomUUID().toString());
@@ -32,8 +32,8 @@ public class OrderService {
                 .toList();
         // call inventory service to check if items in stock
 
-            InventoryResponse[] inventoryResponseArray = webClient.get()
-                    .uri("http://localhost:8082/api/inventory",
+            InventoryResponse[] inventoryResponseArray = webClientBuilder.build().get()
+                    .uri("http://inventory-service/api/inventory",
                             uriBuilder -> uriBuilder.queryParam("skuCode", skuCodes).build())
                     .retrieve()
                     .bodyToMono(InventoryResponse[].class)
@@ -42,7 +42,7 @@ public class OrderService {
         assert inventoryResponseArray != null;
         boolean allProductsInStock = Arrays.stream(inventoryResponseArray)
                 .allMatch(InventoryResponse::isInStock);
-        if(!allProductsInStock || inventoryResponseArray.length <1){
+        if(!allProductsInStock){
             throw new IllegalArgumentException("product not in stock try later");
         }
 
